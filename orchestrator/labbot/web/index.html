@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>LabBot</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<div class="shell">
+  <aside class="rail">
+    <div class="brand">Lab<span>Bot</span></div>
+
+    <button class="new-work" id="newLab" type="button">+ Новая работа</button>
+    <input id="search" class="search" type="search" placeholder="Поиск" aria-label="Поиск работы">
+
+    <nav class="work-list" id="labs" aria-label="Работы"></nav>
+
+    <div class="rail-foot">
+      <button class="link" id="refresh" type="button">Обновить</button>
+      <button class="link" id="openSettings" type="button">Настройки</button>
+      <span class="key" id="envInfo">…</span>
+    </div>
+  </aside>
+
+  <main class="page">
+    <header class="masthead">
+      <div class="masthead-top">
+        <p class="kicker" id="labEyebrow">Работа</p>
+        <button class="link quiet-link hidden" id="deleteLabTop" type="button">Удалить работу</button>
+      </div>
+      <h1 id="labTitle">Выберите работу</h1>
+      <p class="lede" id="labSubtitle">Слева — список ваших работ</p>
+    </header>
+
+    <div id="workspace" class="workspace hidden">
+      <section class="block reveal" style="--i:0">
+        <div class="block-head">
+          <h2>Материалы</h2>
+          <span class="note">методичка и, если есть, образец</span>
+        </div>
+        <div id="docs" class="docs"></div>
+      </section>
+
+      <section class="block reveal" style="--i:1">
+        <div class="block-head">
+          <h2>Исполнитель</h2>
+          <span class="note">попадёт на титульный лист</span>
+        </div>
+        <div class="fields">
+          <label><span>Студент</span><input id="student" placeholder="Фамилия И.О." autocomplete="off"></label>
+          <label><span>Группа</span><input id="group" placeholder="Группа" autocomplete="off"></label>
+          <label><span>Преподаватель</span><input id="teacher" placeholder="необязательно" autocomplete="off"></label>
+        </div>
+
+        <details class="disclosure">
+          <summary>Параметры запуска</summary>
+          <div class="fields two">
+            <label><span>Вариант</span><input id="variant" placeholder="1" autocomplete="off"></label>
+            <label><span>Режим</span>
+              <select id="mode">
+                <option value="report">Полный цикл</option>
+                <option value="build">PDF и Word из build</option>
+                <option value="pdf">Только PDF</option>
+                <option value="docx">Только Word</option>
+              </select>
+            </label>
+            <label><span>Начать с этапа</span>
+              <select id="fromStage">
+                <option value="">Из кэша</option>
+                <option value="extract">Чтение документов</option>
+                <option value="outline">Структура</option>
+                <option value="code">Код</option>
+                <option value="scripts">Графики</option>
+                <option value="sections">Разделы</option>
+                <option value="assemble">Сборка</option>
+              </select>
+            </label>
+            <label class="checkline"><input type="checkbox" id="remember"> Запомнить ФИО</label>
+          </div>
+        </details>
+      </section>
+
+      <section class="block reveal" style="--i:2">
+        <div class="block-head">
+          <h2>Отчёт</h2>
+          <span class="note" id="statusText"></span>
+        </div>
+
+        <div class="actions">
+          <button class="solid" id="start" type="button">Сгенерировать</button>
+          <button class="quiet" id="stop" type="button" disabled>Остановить</button>
+          <span class="hint">Ctrl + Enter</span>
+        </div>
+
+        <div class="track" aria-hidden="true"><div class="track-fill" id="progressBar"></div></div>
+        <ol class="steps" id="steps"></ol>
+
+        <details class="log-box" id="logBox">
+          <summary>Журнал <span class="cost" id="cost"></span></summary>
+          <pre id="log" class="log" aria-live="polite"></pre>
+        </details>
+      </section>
+
+      <section class="block reveal" style="--i:3">
+        <div class="block-head">
+          <h2>Готовые файлы</h2>
+          <div class="mini-actions">
+            <button class="link" id="reveal" type="button">Открыть папку</button>
+            <button class="link quiet-link" id="cleanLab" type="button">Очистить кэш</button>
+            <button class="link quiet-link" id="deleteLab" type="button">Удалить</button>
+          </div>
+        </div>
+        <div id="results" class="results"></div>
+      </section>
+    </div>
+  </main>
+</div>
+
+<div id="settingsModal" class="modal hidden" role="dialog" aria-modal="true" aria-label="Настройки">
+  <div class="modal-card">
+    <header class="modal-head">
+      <h2>Настройки</h2>
+      <button class="link" id="settingsClose" type="button">Закрыть</button>
+    </header>
+
+    <div class="modal-body">
+      <section>
+        <h3>DeepSeek</h3>
+        <div class="fields two">
+          <label><span>API-ключ</span><input id="setApiKey" type="password" autocomplete="off" placeholder="sk-..."></label>
+          <label><span>Провайдер</span>
+            <select id="setProvider">
+              <option value="deepseek">DeepSeek</option>
+              <option value="openai">OpenAI</option>
+              <option value="openrouter">OpenRouter</option>
+              <option value="ollama">Ollama / LM Studio</option>
+              <option value="custom">Другой (вручную)</option>
+            </select>
+          </label>
+          <label><span>Модель</span>
+            <input id="setModel" list="modelPresets" autocomplete="off">
+            <datalist id="modelPresets">
+              <option value="deepseek-chat"></option>
+              <option value="deepseek-reasoner"></option>
+              <option value="gpt-4o-mini"></option>
+              <option value="openai/gpt-4o-mini"></option>
+              <option value="llama3.1"></option>
+            </datalist>
+          </label>
+          <label><span>Адрес API</span><input id="setBaseUrl" autocomplete="off"></label>
+          <label><span>Температура</span><input id="setTemperature" type="number" step="0.1" min="0" max="2"></label>
+          <label><span>Max tokens</span><input id="setMaxTokens" type="number" min="512" step="256"></label>
+          <label><span>Таймаут, сек</span><input id="setTimeout" type="number" min="10"></label>
+          <label><span>Повторы</span><input id="setRetries" type="number" min="0" max="10"></label>
+          <label><span>Лимит, $</span><input id="setCostLimit" type="number" step="0.05" min="0.01"></label>
+        </div>
+        <p class="note">Подойдёт любой OpenAI-совместимый API: OpenAI, OpenRouter, Ollama, LM Studio.
+          Ключ отправляется выбранному провайдеру в заголовке Authorization.</p>
+        <div class="row">
+          <span id="keyStatus" class="note"></span>
+          <button class="quiet" id="testKey" type="button">Проверить ключ</button>
+        </div>
+      </section>
+
+      <section>
+        <h3>Титульный лист</h3>
+        <div class="fields two">
+          <label><span>Студент</span><input id="setStudent" autocomplete="off"></label>
+          <label><span>Группа</span><input id="setGroup" autocomplete="off"></label>
+          <label><span>Преподаватель</span><input id="setTeacher" autocomplete="off"></label>
+          <label><span>Факультет</span><input id="setFaculty" autocomplete="off"></label>
+          <label><span>Кафедра</span><input id="setDepartment" autocomplete="off"></label>
+          <label><span>Год</span><input id="setYear" placeholder="текущий" inputmode="numeric"></label>
+        </div>
+      </section>
+
+      <section>
+        <h3>Промпты</h3>
+        <div class="prompt-tools">
+          <select id="promptSelect"></select>
+          <button class="quiet" id="promptReset" type="button">Сбросить</button>
+        </div>
+        <p id="promptHints" class="note"></p>
+        <textarea id="promptText" spellcheck="false"></textarea>
+      </section>
+    </div>
+
+    <footer class="modal-foot">
+      <span id="settingsPath" class="note"></span>
+      <div class="mini-actions">
+        <button class="quiet" id="settingsCancel" type="button">Отмена</button>
+        <button class="solid" id="settingsSave" type="button">Сохранить</button>
+      </div>
+    </footer>
+  </div>
+</div>
+
+
+<div id="newModal" class="modal hidden" role="dialog" aria-modal="true" aria-label="Новая работа">
+  <div class="modal-card small">
+    <header class="modal-head">
+      <h2>Новая работа</h2>
+      <button class="link" id="newClose" type="button">Закрыть</button>
+    </header>
+    <div class="modal-body">
+      <div class="fields">
+        <label><span>Название</span>
+          <input id="newName" placeholder="Например: 05 или Курсовая по сетям" autocomplete="off">
+        </label>
+      </div>
+      <p class="note">Номер превратится в <code>lab_05</code>. Любое другое имя станет папкой:
+        «Курсовая по сетям», «network-course», «зачёт».</p>
+      <label class="doc-add new-file">Сразу приложить задание
+        <input id="newFile" type="file" accept=".pdf,.docx,.txt,.md">
+      </label>
+      <p id="newHint" class="note"></p>
+    </div>
+    <footer class="modal-foot">
+      <span></span>
+      <div class="mini-actions">
+        <button class="quiet" id="newCancel" type="button">Отмена</button>
+        <button class="solid" id="newCreate" type="button">Создать</button>
+      </div>
+    </footer>
+  </div>
+</div>
+
+
+<div id="deleteModal" class="modal hidden" role="dialog" aria-modal="true" aria-label="Удалить работу">
+  <div class="modal-card small">
+    <header class="modal-head">
+      <h2>Удалить работу?</h2>
+      <button class="link" id="deleteClose" type="button">Закрыть</button>
+    </header>
+    <div class="modal-body">
+      <p class="confirm-text">Папка <b id="deleteName"></b> будет удалена вместе с документами,
+        отчётами и исходниками. Отменить это нельзя.</p>
+    </div>
+    <footer class="modal-foot">
+      <span></span>
+      <div class="mini-actions">
+        <button class="quiet" id="deleteCancel" type="button">Отмена</button>
+        <button class="danger" id="deleteConfirm" type="button">Удалить</button>
+      </div>
+    </footer>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+<script src="/app.js"></script>
+</body>
+</html>

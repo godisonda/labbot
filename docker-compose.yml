@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  labbot:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    volumes:
+      - .:/app
+    environment:
+      - DEEPSEEK_API_KEY=${DEEPSEEK_API_KEY}
+      - DEEPSEEK_BASE_URL=${DEEPSEEK_BASE_URL:-https://api.deepseek.com}
+      - DEEPSEEK_MODEL=${DEEPSEEK_MODEL:-deepseek-chat}
+      - STUDENT=${STUDENT}
+      - GROUP=${GROUP}
+      - TEACHER=${TEACHER}
+      - FACULTY=${FACULTY}
+      - DEPARTMENT=${DEPARTMENT}
+    working_dir: /app

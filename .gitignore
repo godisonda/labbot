@@ -1,0 +1,25 @@
+# Python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+*.egg-info/
+
+# Секреты и локальные настройки
+.env
+settings.json
+
+# Сборки
+dist/
+build/
+*.spec.bak
+
+# Работы пользователей: в репозитории только структура папки
+labs/*
+!labs/.gitkeep
+!labs/README.md
+
+# macOS / Windows
+.DS_Store
+Thumbs.db
